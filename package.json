@@ -1,0 +1,24 @@
+{
+  "name": "whiteboard-importer",
+  "version": "0.1.0",
+  "description": "Sass importer",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/teefouad/whiteboard-importer.git"
+  },
+  "keywords": [
+    "sass",
+    "importer",
+    "whiteboard"
+  ],
+  "author": "Mostafa Fouad",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/teefouad/whiteboard-importer/issues"
+  },
+  "homepage": "https://github.com/teefouad/whiteboard-importer#readme"
+}
