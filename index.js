@@ -17,12 +17,12 @@ function importer(path, prev, done) {
     try {
       stat = fs.lstatSync(sassPath + '/sass/' + path + '.scss');
     } catch (e) {
-      return done(null);
+      return done && done(null);
     }
   }
   
   if (stat.isFile()) {
-    done({
+    done && done({
       file: resolve(sassPath + '/sass/' + path)
     });
   }
