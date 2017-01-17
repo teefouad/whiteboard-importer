@@ -1,34 +1,46 @@
 var fs = require('fs');
 var resolve = require('path').resolve;
 
-var importer = function(sassPath) {
-  return function (path, prev, done) {
-    var stat, isPartial = true;
-    
-    try {
-      var pathArray = path.split('/');
-      var file = '_' + pathArray.pop();
-      stat = fs.lstatSync(sassPath + '/sass/' + pathArray.join('/') + '/' + file + '.scss');
-    } catch (e) {
-      isPartial = false;
-    }
-    
-    if (!isPartial) {
-      try {
-        stat = fs.lstatSync(sassPath + '/sass/' + path + '.scss');
-      } catch (e) {
-        return done();
-      }
-    }
-    
-    if (stat.isFile()) {
-      done({
-        file: resolve(sassPath + '/sass/' + path)
-      });
-    }
+function log(msg, logPad) {
+  if (process.env.WB_DEBUG) {
+    var pad = Array(logPad || 1);
+    console.log('[Whiteboard Importer]', pad.join(' '), msg);
   }
 }
 
-module.exports = function(dirname) {
-  return importer(dirname);
-};
+module.exports = function(sassPath, importers) {
+  return (function(sassPath, importers) {
+    return function (path, prev, done, logPad) {
+      log('Looking for path: ' + sassPath + '/' + path, logPad);
+      log('Checking if file exists...', logPad);
+
+      var stat;
+      var pathArray = path.split('/');
+      var fileName = pathArray.pop();
+
+      if (fs.existsSync(sassPath + '/' + pathArray.join('/') + '/_' + fileName + '.scss') || fs.existsSync(sassPath + '/' + pathArray.join('/') + '/' + fileName + '.scss')) {
+        log('File exists', logPad);
+        log('Done: ' + sassPath, logPad);
+
+        done({
+          file: resolve(sassPath + '/' + path)
+        });
+      } else {
+        log('File not found, resorting to importers...', logPad);
+
+        if (importers && importers.length > 0) {
+          for (var i = 0, n = importers.length; i < n; i++) {
+            log('Trying importer: ' + i, logPad);
+            importers[i](path, prev, function(obj) {
+              log('Done: ' + sassPath, logPad);
+              done(obj);
+            }, (logPad || 1) + 4);
+          }
+        } else {
+          log('No importers', logPad);
+          done();
+        }
+      }
+    };
+  }(sassPath, importers));
+}
